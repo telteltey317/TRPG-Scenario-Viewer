@@ -11,11 +11,11 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
   position: sticky;
   top: 0;
   background: #fff;
-  padding: 8px 0;
+  padding: 6px 0;
   z-index: 5;
   border-bottom: 1px solid #eee;
 }
@@ -132,4 +132,31 @@ button.ghost {
 
 button.ghost:hover {
   text-decoration: underline;
+}
+
+@media (max-width: 640px) {
+  .npc-list {
+    border-right: none;
+    border-bottom: 1px solid #ddd;
+    height: auto;
+    max-height: 320px;
+  }
+
+  .npc-list__scroll {
+    max-height: 240px;
+  }
+
+  .npc-list__filters {
+    top: 44px;
+  }
+
+   .npc-list__header {
+    padding: 4px 0;
+    margin-bottom: 6px;
+  }
+
+  .npc-list__filters {
+    gap: 6px;
+    padding: 4px 0;
+  }
 }

@@ -11,11 +11,11 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
   position: sticky;
   top: 0;
   background: #fff;
-  padding: 8px 0;
+  padding: 6px 0;
   z-index: 5;
   border-bottom: 1px solid #eee;
 }
@@ -118,3 +118,35 @@
 .badge-etc { background: #f0f0f0; }
 
 .muted { color: #777; }
+
+@media (max-width: 640px) {
+  .scene-list {
+    border-right: none;
+    border-bottom: 1px solid #ddd;
+    height: auto;
+    max-height: 320px;
+  }
+
+  .scene-list__scroll {
+    max-height: 240px;
+  }
+
+  .scene-list__filters {
+    top: 44px;
+  }
+
+  .scene-list__header {
+    padding: 4px 0;
+    margin-bottom: 6px;
+  }
+
+  .scene-list__header button {
+    width: auto;
+    padding: 6px 10px;
+  }
+
+  .scene-list__filters {
+    gap: 6px;
+    padding: 4px 0;
+  }
+}

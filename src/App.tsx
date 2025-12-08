@@ -122,6 +122,12 @@ function App() {
   const selectedScene = scenario.scenes.find((s) => s.id === selectedSceneId);
 
   useEffect(() => {
+    document.title = scenario.meta.title
+      ? `${scenario.meta.title} | TRPGシナリオビューワ`
+      : 'TRPGシナリオビューワ';
+  }, [scenario.meta.title]);
+
+  useEffect(() => {
     if (!lastSavedAt) return;
     if (lastSavedSeen.current === null) {
       lastSavedSeen.current = lastSavedAt;

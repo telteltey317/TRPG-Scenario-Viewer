@@ -62,3 +62,32 @@ button.ghost:hover { text-decoration: underline; }
 
 .link { cursor: pointer; color: #1f6feb; }
 .link:hover { text-decoration: underline; }
+
+@media (max-width: 640px) {
+  .flow-view {
+    padding: 12px;
+    height: auto;
+  }
+
+  .flow-controls .row {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .flow-controls select,
+  .flow-controls input,
+  .flow-controls button {
+    flex: 1 1 48%;
+    min-width: 140px;
+  }
+
+  .flow-controls span { display: none; }
+
+  .flow-list {
+    overflow-x: auto;
+  }
+
+  .flow-list table {
+    min-width: 540px;
+  }
+}

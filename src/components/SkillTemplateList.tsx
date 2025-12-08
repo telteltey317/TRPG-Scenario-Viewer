@@ -78,25 +78,25 @@ export function SkillTemplateList({ templates, onAdd, onUpdate, onDelete, onLoad
       <table>
         <thead>
           <tr>
-          <th>技能名</th>
-          <th style={{ width: '120px' }}>初期値</th>
-          <th style={{ width: '140px' }}>カテゴリ</th>
-          <th style={{ width: '160px' }}>基準ステータス</th>
-          <th style={{ width: '90px' }}>倍率</th>
-          <th style={{ width: '140px' }}>ダメージ(戦闘)</th>
-          <th style={{ width: '80px' }}></th>
-        </tr>
-      </thead>
-      <tbody>
-        {filtered.map((tpl) => (
+            <th>技能名</th>
+            <th style={{ width: '140px' }}>カテゴリ</th>
+            <th style={{ width: '120px' }}>初期値</th>
+            <th style={{ width: '160px' }}>基準ステータス</th>
+            <th style={{ width: '90px' }}>倍率</th>
+            <th style={{ width: '140px' }}>ダメージ(戦闘)</th>
+            <th style={{ width: '80px' }}></th>
+          </tr>
+        </thead>
+        <tbody>
+          {filtered.map((tpl) => (
             <tr key={tpl.id}>
-              <td>
+              <td data-label="技能名">
                 <input
                   value={tpl.name}
                   onChange={(e) => onUpdate({ ...tpl, name: e.target.value })}
                 />
               </td>
-              <td>
+              <td data-label="カテゴリ">
                 <select
                   value={tpl.category ?? 'general'}
                   onChange={(e) =>
@@ -110,7 +110,7 @@ export function SkillTemplateList({ templates, onAdd, onUpdate, onDelete, onLoad
                   <option value="combat">戦闘</option>
                 </select>
               </td>
-              <td>
+              <td data-label="初期値">
                 <input
                   type="number"
                   value={tpl.defaultValue ?? ''}
@@ -122,7 +122,7 @@ export function SkillTemplateList({ templates, onAdd, onUpdate, onDelete, onLoad
                   }
                 />
               </td>
-              <td>
+              <td data-label="基準ステータス">
                 <input
                   value={tpl.calcStat ?? ''}
                   onChange={(e) =>
@@ -135,7 +135,7 @@ export function SkillTemplateList({ templates, onAdd, onUpdate, onDelete, onLoad
                   list="stat-suggestions"
                 />
               </td>
-              <td>
+              <td data-label="倍率">
                 <input
                   type="number"
                   value={tpl.calcMultiplier ?? ''}
@@ -148,7 +148,7 @@ export function SkillTemplateList({ templates, onAdd, onUpdate, onDelete, onLoad
                   }
                 />
               </td>
-              <td>
+              <td data-label="ダメージ(戦闘)">
                 <input
                   value={tpl.damage ?? ''}
                   onChange={(e) =>
@@ -161,7 +161,7 @@ export function SkillTemplateList({ templates, onAdd, onUpdate, onDelete, onLoad
                   disabled={(tpl.category ?? 'general') !== 'combat'}
                 />
               </td>
-              <td>
+              <td data-label="操作">
                 <button className="ghost" onClick={() => onDelete(tpl.id)}>
                   削除
                 </button>

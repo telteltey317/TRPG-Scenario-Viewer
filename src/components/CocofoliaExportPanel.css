@@ -21,6 +21,18 @@
   font-size: 14px;
 }
 
+.coco-options label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 0;
+}
+
+.coco-options input[type='checkbox'] {
+  width: 16px;
+  height: 16px;
+}
+
 .status-text {
   margin-top: 8px;
   color: #2c5282;

@@ -28,3 +28,18 @@
 .edge-text { font-size: 11px; fill: #4b5563; text-anchor: middle; pointer-events: none; }
 
 .muted { color: #6e6e6e; }
+
+@media (max-width: 640px) {
+  .flow-graph {
+    padding: 10px;
+  }
+
+  .flow-graph svg {
+    height: 360px;
+  }
+
+  .flow-graph__header h3 {
+    margin: 0;
+    font-size: 16px;
+  }
+}
