@@ -1,73 +1,42 @@
-# React + TypeScript + Vite
+# CoC6 シナリオビューワ (KP 向け)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Call of Cthulhu 6 版の KP がセッション当日に使うことを想定したシナリオ管理・閲覧用の静的 Web アプリです。  
+シーン／NPC／技能テンプレ／フローチャートをまとめ、ココフォリア用のキャラエクスポートにも対応します。すべてブラウザ内完結で外部送信は行いません。
 
-Currently, two official plugins are available:
+## 主な機能
+- シーン一覧と詳細表示、SAN/技能ヒント/BGM/背景/NPC 登場管理
+- NPC 管理：ステータス自動計算（HP/MP/DB）、一般技能・戦闘技能の別管理、ダメージ計算、Q&A、登場シーン紐付け
+- 技能テンプレ管理：CoC6 標準テンプレ読み込み、検索・全選択、戦闘技能にはダメージ入力対応
+- フローチャート：シーン間の流れを可視化・ドラッグ移動
+- ココフォリア出力：NPC を Clipboard API 形式でコピー（秘匿/SAN コマンドオプション）
+- 履歴 Undo、トースト通知、ローカル自動保存（localStorage）
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## データポリシー
+- シナリオデータはブラウザのメモリと `localStorage` のみで保持。
+- 明示的なエクスポート操作時のみ JSON をダウンロード。ネットワーク送信・解析タグ・外部 API 呼び出しは実装していません。
+- 共有端末では利用後に「空にする」かブラウザのストレージ削除を推奨。
 
-## React Compiler
+## 開発環境
+- Node.js 18+ を推奨
+- React 19 + TypeScript + Vite
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### セットアップ & 実行
+```bash
+npm install
+npm run dev     # 開発サーバ
+npm run build   # 本番ビルド（dist/ に出力）
+npm run preview # ビルド済みをローカル確認
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## デプロイ (Cloudflare Pages)
+1. GitHub にリポジトリを push（このプロジェクトは `dist` を生成する静的サイトです）。
+2. Cloudflare Pages でリポジトリを選択し、Build command を `npm run build`、Build output directory を `dist` に設定。
+3. `_headers` に CSP などのセキュリティヘッダーを含めているため追加設定不要。HTTPS リダイレクトを有効化すると Clipboard の失敗を防ぎやすくなります。
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## セキュリティとプライバシー
+- 外部通信なし。CSP/Permissions-Policy/X-Frame-Options 等を `public/_headers` に設定済み（Cloudflare Pages で配信時に適用）。
+- `dangerouslySetInnerHTML` 未使用で、ユーザー入力は React のエスケープを通ります。
+- クリップボードへの書き込みはユーザー操作後のみ。HTTPS での利用を推奨。
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+## ライセンス
+現状ライセンス未設定（必要に応じて追記してください）。
