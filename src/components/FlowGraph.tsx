@@ -7,13 +7,80 @@ type Props = {
   edges: FlowEdge[];
   layout: FlowNodeLayout[];
   onSelectScene?: (id: string) => void;
-  onAutoLayout?: () => void;
+  onAutoLayout?: (layout: FlowNodeLayout[]) => void;
   onLayoutChange?: (layout: FlowNodeLayout[]) => void;
 };
 
 const NODE_W = 140;
 const NODE_H = 60;
 const GAP = 60;
+
+function autoLayoutByDependency(scenes: Scene[], edges: FlowEdge[]): FlowNodeLayout[] {
+  const spacingX = 220;
+  const spacingY = 180;
+
+  const indeg = new Map<string, number>();
+  const children = new Map<string, string[]>();
+  scenes.forEach((s) => {
+    indeg.set(s.id, 0);
+    children.set(s.id, []);
+  });
+
+  edges.forEach((e) => {
+    if (!indeg.has(e.from)) indeg.set(e.from, 0);
+    if (!indeg.has(e.to)) indeg.set(e.to, 0);
+    indeg.set(e.to, (indeg.get(e.to) ?? 0) + 1);
+    children.get(e.from)?.push(e.to);
+  });
+
+  const queue: string[] = [];
+  indeg.forEach((d, id) => {
+    if (d === 0) queue.push(id);
+  });
+  // fallback: if all nodes have incoming edges (cycle), start from first scene
+  if (queue.length === 0 && scenes[0]) queue.push(scenes[0].id);
+
+  const level = new Map<string, number>();
+  queue.forEach((id) => level.set(id, 0));
+
+  const visited = new Set<string>();
+  while (queue.length) {
+    const id = queue.shift()!;
+    visited.add(id);
+    const currentLevel = level.get(id) ?? 0;
+    (children.get(id) ?? []).forEach((child) => {
+      if ((level.get(child) ?? -1) < currentLevel + 1) {
+        level.set(child, currentLevel + 1);
+      }
+      indeg.set(child, (indeg.get(child) ?? 1) - 1);
+      if ((indeg.get(child) ?? 0) <= 0 && !visited.has(child)) {
+        queue.push(child);
+      }
+    });
+  }
+
+  // assign level 0 to any remaining nodes (cycles not reached)
+  scenes.forEach((s) => {
+    if (!level.has(s.id)) level.set(s.id, 0);
+  });
+
+  const grouped = new Map<number, Scene[]>();
+  scenes.forEach((s) => {
+    const l = level.get(s.id) ?? 0;
+    if (!grouped.has(l)) grouped.set(l, []);
+    grouped.get(l)!.push(s);
+  });
+
+  const layouts: FlowNodeLayout[] = [];
+  const maxLevel = Math.max(...Array.from(grouped.keys()), 0);
+  for (let l = 0; l <= maxLevel; l++) {
+    const row = grouped.get(l) ?? [];
+    row.forEach((scene, idx) => {
+      layouts.push({ sceneId: scene.id, x: idx * spacingX, y: l * spacingY });
+    });
+  }
+  return layouts;
+}
 
 function computeLayout(scenes: Scene[], layout: FlowNodeLayout[]) {
   const map = new Map<string, FlowNodeLayout>();
@@ -41,6 +108,8 @@ export function FlowGraph({ scenes, edges, layout, onSelectScene, onAutoLayout, 
   const layoutMap = useMemo(() => computeLayout(scenes, layout), [scenes, layout]);
   const [draggingId, setDraggingId] = useState<string | null>(null);
   const dragOffset = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
+  const [view, setView] = useState({ x: 10, y: 10, scale: 1 });
+  const panState = useRef<{ active: boolean; startX: number; startY: number }>({ active: false, startX: 0, startY: 0 });
 
   const maxX = Math.max(...Array.from(layoutMap.values()).map((l) => l.x + NODE_W), NODE_W) + GAP;
   const maxY = Math.max(...Array.from(layoutMap.values()).map((l) => l.y + NODE_H), NODE_H) + GAP;
@@ -68,6 +137,14 @@ export function FlowGraph({ scenes, edges, layout, onSelectScene, onAutoLayout, 
   };
 
   const handleMouseMove = (e: React.MouseEvent<SVGSVGElement, MouseEvent>) => {
+    if (panState.current.active) {
+      const dx = e.clientX - panState.current.startX;
+      const dy = e.clientY - panState.current.startY;
+      panState.current.startX = e.clientX;
+      panState.current.startY = e.clientY;
+      setView((v) => ({ ...v, x: v.x + dx, y: v.y + dy }));
+      return;
+    }
     if (!draggingId || !onLayoutChange) return;
     const svg = e.currentTarget;
     const ctm = svg.getScreenCTM();
@@ -76,8 +153,8 @@ export function FlowGraph({ scenes, edges, layout, onSelectScene, onAutoLayout, 
     pt.x = e.clientX;
     pt.y = e.clientY;
     const local = pt.matrixTransform(ctm.inverse());
-    const nextX = local.x - dragOffset.current.x;
-    const nextY = local.y - dragOffset.current.y;
+    const nextX = (local.x - dragOffset.current.x) / view.scale;
+    const nextY = (local.y - dragOffset.current.y) / view.scale;
     const nextLayout = Array.from(layoutMap.values()).map((l) =>
       l.sceneId === draggingId ? { ...l, x: nextX, y: nextY } : l,
     );
@@ -86,6 +163,12 @@ export function FlowGraph({ scenes, edges, layout, onSelectScene, onAutoLayout, 
 
   const handleMouseUp = () => {
     setDraggingId(null);
+    panState.current.active = false;
+  };
+
+  const startPan = (e: React.MouseEvent<SVGSVGElement, MouseEvent>) => {
+    if (e.target !== e.currentTarget) return;
+    panState.current = { active: true, startX: e.clientX, startY: e.clientY };
   };
 
   return (
@@ -97,23 +180,37 @@ export function FlowGraph({ scenes, edges, layout, onSelectScene, onAutoLayout, 
         </div>
         <div className="row gap-sm">
           {draggingId && <span className="muted">ドラッグ中: {draggingId}</span>}
-          {onAutoLayout && <button onClick={onAutoLayout}>オートレイアウト</button>}
+          {onAutoLayout && (
+            <button
+              onClick={() => onAutoLayout(autoLayoutByDependency(scenes, edges))}
+              title="依存関係ベースで整列"
+            >
+              オートレイアウト
+            </button>
+          )}
+          <div className="view-controls">
+            <button onClick={() => setView((v) => ({ ...v, scale: Math.min(2, v.scale + 0.1) }))}>＋</button>
+            <button onClick={() => setView((v) => ({ ...v, scale: Math.max(0.6, v.scale - 0.1) }))}>－</button>
+            <button onClick={() => setView({ x: 10, y: 10, scale: 1 })}>リセット</button>
+          </div>
         </div>
       </div>
       <svg
         width="100%"
-        height="500"
-        viewBox={`0 0 ${maxX} ${Math.max(maxY, 400)}`}
+        height="420"
+        viewBox={`0 0 ${maxX + 60} ${Math.max(maxY, 360) + 60}`}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
-      >
+        onMouseDown={startPan}
+        >
         <defs>
           <marker id="arrow" markerWidth="10" markerHeight="10" refX="10" refY="5" orient="auto" markerUnits="strokeWidth">
             <path d="M0,0 L10,5 L0,10 z" fill="#555" />
           </marker>
         </defs>
 
+        <g transform={`translate(${view.x} ${view.y}) scale(${view.scale})`}>
         {edges.map((edge) => {
           const from = layoutMap.get(edge.from);
           const to = layoutMap.get(edge.to);
@@ -160,6 +257,7 @@ export function FlowGraph({ scenes, edges, layout, onSelectScene, onAutoLayout, 
             </g>
           );
         })}
+        </g>
       </svg>
     </div>
   );

@@ -63,6 +63,66 @@ button.ghost:hover { text-decoration: underline; }
 .link { cursor: pointer; color: #1f6feb; }
 .link:hover { text-decoration: underline; }
 
+.gate-builder {
+  margin-top: 6px;
+  padding: 8px;
+  border: 1px solid #e5e7ef;
+  border-radius: 8px;
+  background: #fafbff;
+}
+
+.gate-builder__title {
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.gate-builder__body {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: 2fr 1fr;
+  align-items: start;
+}
+
+.gate-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 6px 8px;
+  max-height: 160px;
+  overflow: auto;
+}
+
+.gate-list label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  padding: 2px 4px;
+  line-height: 1.2;
+}
+
+.gate-list input[type='checkbox'] {
+  width: 14px;
+  height: 14px;
+}
+
+.gate-target {
+  display: grid;
+  gap: 4px;
+}
+
+.gate-target select {
+  padding: 6px 8px;
+  border: 1px solid #d5d7df;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.gate-target button {
+  justify-self: start;
+  padding: 6px 10px;
+  font-size: 13px;
+}
+
 @media (max-width: 640px) {
   .flow-view {
     padding: 12px;
@@ -89,5 +149,13 @@ button.ghost:hover { text-decoration: underline; }
 
   .flow-list table {
     min-width: 540px;
+  }
+
+  .gate-builder__body {
+    grid-template-columns: 1fr;
+  }
+
+  .gate-list {
+    max-height: 160px;
   }
 }

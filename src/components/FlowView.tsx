@@ -21,6 +21,8 @@ export function FlowView({ scenes, edges, layout, onAddEdge, onUpdateEdge, onDel
   const [condition, setCondition] = useState('');
   const [note, setNote] = useState('');
   const [warning, setWarning] = useState<string | null>(null);
+  const [gateSources, setGateSources] = useState<string[]>([]);
+  const [gateTarget, setGateTarget] = useState<string>('');
 
   const sceneMap = useMemo(() => new Map(scenes.map((s) => [s.id, s])), [scenes]);
 
@@ -37,27 +39,38 @@ export function FlowView({ scenes, edges, layout, onAddEdge, onUpdateEdge, onDel
     setWarning(null);
   };
 
+  const toggleGateSource = (id: string, checked: boolean) => {
+    setGateSources((prev) => (checked ? [...prev, id] : prev.filter((v) => v !== id)));
+  };
+
+  const handleGateAdd = () => {
+    if (!gateTarget || gateSources.length === 0) return;
+    const names = scenes
+      .filter((s) => gateSources.includes(s.id))
+      .map((s) => s.title)
+      .join(' / ');
+    let skipped = 0;
+    gateSources.forEach((sid, idx) => {
+      const dup = edges.some((e) => e.from === sid && e.to === gateTarget);
+      if (dup) {
+        skipped += 1;
+        return;
+      }
+      onAddEdge({
+        from: sid,
+        to: gateTarget,
+        type: 'optional',
+        condition: idx === 0 ? `全て(${names})完了で解放` : undefined,
+        note: idx === 0 ? '並行探索→合流' : undefined,
+      });
+    });
+    setGateSources([]);
+    setGateTarget('');
+    setWarning(skipped ? '一部のエッジは重複のため追加しませんでした' : null);
+  };
+
   return (
     <div className="flow-view">
-      <FlowGraph
-        scenes={scenes}
-        edges={edges}
-        layout={layout}
-        onSelectScene={onSelectScene}
-        onLayoutChange={onAutoLayout}
-        onAutoLayout={() => {
-          const perRow = 4;
-          const spacingX = 200;
-          const spacingY = 140;
-          const next: FlowNodeLayout[] = scenes.map((scene, idx) => {
-            const row = Math.floor(idx / perRow);
-            const col = idx % perRow;
-            return { sceneId: scene.id, x: col * spacingX, y: row * spacingY };
-          });
-          onAutoLayout(next);
-        }}
-      />
-
       <div className="flow-controls">
         <div className="row gap-sm">
           <select value={from} onChange={(e) => setFrom(e.target.value)}>
@@ -90,8 +103,50 @@ export function FlowView({ scenes, edges, layout, onAddEdge, onUpdateEdge, onDel
           />
           <button onClick={handleAdd} disabled={!from || !to || from === to}>エッジ追加</button>
         </div>
+        <div className="gate-builder">
+          <div className="gate-builder__title">全探索後に解放 (AND)</div>
+          <div className="gate-builder__body">
+            <div className="gate-list">
+              {scenes.map((s) => (
+                <label key={s.id}>
+                  <input
+                    type="checkbox"
+                    checked={gateSources.includes(s.id)}
+                    onChange={(e) => toggleGateSource(s.id, e.target.checked)}
+                  />
+                  {s.title}
+                </label>
+              ))}
+            </div>
+            <div className="gate-target">
+              <span className="muted">全て終えたら進む先</span>
+              <select value={gateTarget} onChange={(e) => setGateTarget(e.target.value)}>
+                <option value="">選択してください</option>
+                {scenes.map((s) => (
+                  <option key={s.id} value={s.id}>{s.title}</option>
+                ))}
+              </select>
+              <button
+                onClick={handleGateAdd}
+                disabled={!gateTarget || gateSources.length === 0}
+              >
+                一括作成
+              </button>
+            </div>
+          </div>
+          <div className="muted small">例: A→(B/C/D自由探索)→E をまとめて登録</div>
+        </div>
         {warning && <div className="warn-text">{warning}</div>}
       </div>
+
+      <FlowGraph
+        scenes={scenes}
+        edges={edges}
+        layout={layout}
+        onSelectScene={onSelectScene}
+        onLayoutChange={onAutoLayout}
+        onAutoLayout={onAutoLayout}
+      />
 
       <div className="flow-list">
         <table>
