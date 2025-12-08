@@ -1,0 +1,29 @@
+.coco-panel {
+  margin-top: 16px;
+  padding: 12px 14px;
+  border: 1px solid #e2e6f0;
+  border-radius: 8px;
+  background: #f9fbff;
+}
+
+.coco-panel__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.coco-options {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  font-size: 14px;
+}
+
+.status-text {
+  margin-top: 8px;
+  color: #2c5282;
+}
+
+.muted { color: #6e6e6e; }

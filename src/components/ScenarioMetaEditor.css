@@ -1,0 +1,34 @@
+.meta-editor {
+  padding: 20px 24px;
+  overflow-y: auto;
+  height: 100%;
+}
+
+.meta-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.meta-editor input,
+.meta-editor textarea {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid #d5d7df;
+  border-radius: 6px;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+.meta-editor textarea {
+  resize: vertical;
+}
+
+.meta-notes {
+  display: block;
+}
+
+.meta-notes textarea {
+  margin-top: 6px;
+}

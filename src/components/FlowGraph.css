@@ -1,0 +1,30 @@
+.flow-graph {
+  border: 1px solid #e2e6f0;
+  border-radius: 10px;
+  padding: 12px;
+  margin-bottom: 12px;
+  background: #f9fbff;
+}
+
+.flow-graph__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.node { cursor: grab; }
+.node:active { cursor: grabbing; }
+
+.node-title { font-size: 13px; text-anchor: middle; fill: #1f2933; }
+.node-type { font-size: 11px; text-anchor: middle; fill: #4b5563; text-transform: uppercase; }
+.node-intro { fill: #0ea5e9; }
+.node-investigation { fill: #16a34a; }
+.node-combat { fill: #ef4444; }
+.node-climax { fill: #f59e0b; }
+.node-epilogue { fill: #8b5cf6; }
+.node-etc { fill: #6b7280; }
+
+.edge-text { font-size: 11px; fill: #4b5563; text-anchor: middle; pointer-events: none; }
+
+.muted { color: #6e6e6e; }

@@ -1,0 +1,77 @@
+import type { SkillTemplate } from '../types';
+
+// 一般的なCoC6初期値を含むテンプレート（主要技能を拡充）
+export const coc6SkillTemplates: SkillTemplate[] = [
+  // 感覚・調査
+  { id: 'spot', name: '目星', defaultValue: 25, category: 'general' },
+  { id: 'listen', name: '聞き耳', defaultValue: 25, category: 'general' },
+  { id: 'library', name: '図書館', defaultValue: 25, category: 'general' },
+  { id: 'track', name: '追跡', defaultValue: 10, category: 'general' },
+  { id: 'photography', name: '写真術', defaultValue: 10, category: 'general' },
+  { id: 'disguise', name: '変装', defaultValue: 1, category: 'general' },
+
+  // 心理・交渉
+  { id: 'psychology', name: '心理学', defaultValue: 5, category: 'general' },
+  { id: 'fastTalk', name: '言いくるめ', defaultValue: 5, category: 'general' },
+  { id: 'persuade', name: '説得', defaultValue: 15, category: 'general' },
+  { id: 'bargain', name: '値切り', defaultValue: 5, category: 'general' },
+  { id: 'credit', name: '信用', defaultValue: 15, category: 'general' },
+
+  // 学問・知識
+  { id: 'occult', name: 'オカルト', defaultValue: 5, category: 'general' },
+  { id: 'cthulhu', name: 'クトゥルフ神話', defaultValue: 0, category: 'general' },
+  { id: 'anthropology', name: '人類学', defaultValue: 1, category: 'general' },
+  { id: 'archaeology', name: '考古学', defaultValue: 1, category: 'general' },
+  { id: 'history', name: '歴史', defaultValue: 20, category: 'general' },
+  { id: 'law', name: '法律', defaultValue: 5, category: 'general' },
+  { id: 'naturalHistory', name: '博物学', defaultValue: 10, category: 'general' },
+  { id: 'biology', name: '生物学', defaultValue: 1, category: 'general' },
+  { id: 'chemistry', name: '化学', defaultValue: 1, category: 'general' },
+  { id: 'physics', name: '物理学', defaultValue: 1, category: 'general' },
+  { id: 'astronomy', name: '天文学', defaultValue: 1, category: 'general' },
+  { id: 'geology', name: '地質学', defaultValue: 1, category: 'general' },
+  { id: 'pharmacy', name: '薬学', defaultValue: 1, category: 'general' },
+  { id: 'accounting', name: '経理', defaultValue: 10, category: 'general' },
+  { id: 'art', name: '芸術/製作', defaultValue: 5, category: 'general' },
+  { id: 'otherLang', name: 'ほかの言語', defaultValue: 1, category: 'general' },
+  { id: 'nativeLang', name: '母国語(EDU×5)', defaultValue: undefined, category: 'general', calcStat: 'EDU', calcMultiplier: 5 },
+
+  // 技術・運動
+  { id: 'navigate', name: 'ナビゲート', defaultValue: 10, category: 'general' },
+  { id: 'firstAid', name: '応急手当', defaultValue: 30, category: 'general' },
+  { id: 'medicine', name: '医学', defaultValue: 5, category: 'general' },
+  { id: 'psychoanalysis', name: '精神分析', defaultValue: 1, category: 'general' },
+  { id: 'drive', name: '運転(自動車)', defaultValue: 20, category: 'general' },
+  { id: 'ride', name: '乗馬', defaultValue: 5, category: 'general' },
+  { id: 'pilot', name: '操縦', defaultValue: 1, category: 'general' },
+  { id: 'mechRepair', name: '機械修理', defaultValue: 20, category: 'general' },
+  { id: 'elecRepair', name: '電気修理', defaultValue: 10, category: 'general' },
+  { id: 'electronics', name: '電子工学', defaultValue: 1, category: 'general' },
+  { id: 'computer', name: 'コンピューター', defaultValue: 1, category: 'general' },
+  { id: 'locksmith', name: '鍵開け', defaultValue: 1, category: 'general' },
+  { id: 'heavyMachine', name: '重機械操作', defaultValue: 1, category: 'general' },
+  { id: 'swim', name: '水泳', defaultValue: 25, category: 'general' },
+  { id: 'climb', name: '登攀', defaultValue: 40, category: 'general' },
+  { id: 'jump', name: '跳躍', defaultValue: 25, category: 'general' },
+  { id: 'throw', name: '投擲', defaultValue: 25, category: 'general' },
+  { id: 'hide', name: '隠す', defaultValue: 15, category: 'general' },
+  { id: 'conceal', name: '隠れる', defaultValue: 10, category: 'general' },
+  { id: 'stealth', name: '忍び歩き', defaultValue: 10, category: 'general' },
+  { id: 'dodge', name: '回避(DEX×2)', defaultValue: undefined, category: 'general', calcStat: 'DEX', calcMultiplier: 2 },
+  { id: 'luck', name: '幸運(POW×5)', defaultValue: undefined, calcStat: 'POW', calcMultiplier: 5 },
+
+  // 戦闘系
+  { id: 'brawl', name: 'こぶし(パンチ)', defaultValue: 50, category: 'combat', damage: '1D3+DB' },
+  { id: 'kick', name: 'キック', defaultValue: 25, category: 'combat', damage: '1D6+DB' },
+  { id: 'headbutt', name: '頭突き', defaultValue: 10, category: 'combat', damage: '1D4+DB' },
+  { id: 'grapple', name: '組み付き', defaultValue: 25, category: 'combat', damage: '特殊（組み付きのみ）' },
+  { id: 'knife', name: 'ナイフ', defaultValue: 25, category: 'combat', damage: '1D4+DB' },
+  { id: 'sword', name: '斬撃武器', defaultValue: 20, category: 'combat', damage: '1D8+DB' },
+  { id: 'club', name: '棍棒/鈍器', defaultValue: 25, category: 'combat', damage: '1D6+DB' },
+  { id: 'handgun', name: '拳銃', defaultValue: 20, category: 'combat', damage: '1D10' },
+  { id: 'rifle', name: 'ライフル', defaultValue: 25, category: 'combat', damage: '2D6+4' },
+  { id: 'shotgun', name: 'ショットガン', defaultValue: 25, category: 'combat', damage: '4D6(近距離)/2D6' },
+  { id: 'smg', name: 'サブマシンガン', defaultValue: 15, category: 'combat', damage: '2D6（単射）' },
+  { id: 'mg', name: 'マシンガン', defaultValue: 15, category: 'combat', damage: '2D6+2' },
+  { id: 'bow', name: '弓', defaultValue: 15, category: 'combat', damage: '1D6' },
+];

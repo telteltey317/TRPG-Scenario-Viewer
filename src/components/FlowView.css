@@ -1,0 +1,64 @@
+.flow-view {
+  padding: 16px;
+  height: 100%;
+  overflow: auto;
+}
+
+.flow-controls {
+  margin-bottom: 12px;
+}
+
+.warn-text {
+  color: #b34700;
+  font-size: 13px;
+  margin-top: 6px;
+}
+
+.row { display: flex; align-items: center; }
+.gap-sm { gap: 8px; }
+
+.flow-controls select,
+.flow-controls input {
+  padding: 6px 8px;
+  border: 1px solid #d5d7df;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.flow-controls input { width: 140px; }
+
+.flow-list table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.flow-list th,
+.flow-list td {
+  border-bottom: 1px solid #eee;
+  padding: 8px 6px;
+  vertical-align: top;
+}
+
+.flow-list select,
+.flow-list input {
+  width: 100%;
+  padding: 6px 8px;
+  border: 1px solid #d5d7df;
+  border-radius: 6px;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+.stack { display: grid; gap: 6px; }
+
+button.ghost {
+  border: none;
+  background: transparent;
+  color: #c0392b;
+  cursor: pointer;
+}
+
+button.ghost:hover { text-decoration: underline; }
+
+.link { cursor: pointer; color: #1f6feb; }
+.link:hover { text-decoration: underline; }

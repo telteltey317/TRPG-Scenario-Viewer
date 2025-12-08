@@ -1,0 +1,135 @@
+.npc-list {
+  border-right: 1px solid #ddd;
+  padding: 16px;
+  height: 100%;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+}
+
+.npc-list__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  position: sticky;
+  top: 0;
+  background: #fff;
+  padding: 8px 0;
+  z-index: 5;
+  border-bottom: 1px solid #eee;
+}
+
+.npc-list__filters {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+  position: sticky;
+  top: 56px;
+  background: #fff;
+  padding: 6px 0;
+  z-index: 4;
+  border-bottom: 1px solid #f1f1f1;
+}
+
+.npc-list__scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding-top: 6px;
+}
+
+.npc-list__filters input,
+.npc-list__filters select {
+  flex: 1 1 120px;
+  padding: 6px 8px;
+  border: 1px solid #d5d7df;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.npc-list__filters select {
+  flex: 0 1 140px;
+}
+
+.npc-list__filters .ghost {
+  flex: 0 0 68px;
+  padding: 6px 8px;
+  border: 1px dashed transparent;
+  color: #555;
+}
+
+.npc-list__count {
+  color: #666;
+  font-size: 13px;
+}
+
+.npc-list ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.npc-list li {
+  border: 1px solid #e5e5e5;
+  border-radius: 6px;
+  padding: 10px 12px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.npc-list li:hover {
+  background: #f8f9fb;
+  border-color: #d5d5d5;
+}
+
+.npc-list li.selected {
+  background: #eef4ff;
+  border-color: #8aa4ff;
+}
+
+.npc-list__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.npc-list__name {
+  font-weight: 600;
+}
+
+.npc-list__meta {
+  display: flex;
+  gap: 8px;
+  font-size: 13px;
+  color: #555;
+}
+
+.badge {
+  display: inline-block;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 12px;
+  background: #ececec;
+  text-transform: capitalize;
+}
+
+.role-client { background: #e0f7ff; }
+.role-enemy { background: #ffe0e0; }
+.role-mob { background: #f0f0f0; }
+.role-other { background: #e7e0ff; }
+
+.muted { color: #777; }
+
+button.ghost {
+  border: none;
+  background: transparent;
+  color: #c0392b;
+  cursor: pointer;
+}
+
+button.ghost:hover {
+  text-decoration: underline;
+}

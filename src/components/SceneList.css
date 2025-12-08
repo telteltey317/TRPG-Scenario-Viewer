@@ -1,0 +1,120 @@
+.scene-list {
+  border-right: 1px solid #ddd;
+  height: 100%;
+  padding: 16px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+}
+
+.scene-list__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  position: sticky;
+  top: 0;
+  background: #fff;
+  padding: 8px 0;
+  z-index: 5;
+  border-bottom: 1px solid #eee;
+}
+
+.scene-list__title {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.scene-list__filters {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+  position: sticky;
+  top: 56px;
+  background: #fff;
+  padding: 6px 0;
+  z-index: 4;
+  border-bottom: 1px solid #f1f1f1;
+}
+
+.scene-list__scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding-top: 6px;
+}
+
+.scene-list__filters input,
+.scene-list__filters select {
+  flex: 1 1 140px;
+  padding: 6px 8px;
+  border: 1px solid #d5d7df;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.scene-list__filters select { flex: 0 1 140px; }
+
+.empty { padding: 8px; }
+
+.scene-list__count {
+  color: #666;
+  font-size: 13px;
+}
+
+.scene-list ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.scene-list li {
+  padding: 10px 12px;
+  margin-bottom: 8px;
+  border: 1px solid #e5e5e5;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.scene-list li:hover {
+  background: #f8f9fb;
+  border-color: #d5d5d5;
+}
+
+.scene-list li.selected {
+  background: #eef4ff;
+  border-color: #8aa4ff;
+}
+
+.scene-list__title {
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.scene-list__meta {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  color: #555;
+  font-size: 13px;
+}
+
+.badge {
+  display: inline-block;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 12px;
+  text-transform: capitalize;
+  background: #ececec;
+}
+
+.badge-intro { background: #e0f7ff; }
+.badge-investigation { background: #e3ffe0; }
+.badge-combat { background: #ffe0e0; }
+.badge-climax { background: #ffe8c2; }
+.badge-epilogue { background: #e7e0ff; }
+.badge-etc { background: #f0f0f0; }
+
+.muted { color: #777; }
