@@ -40,6 +40,7 @@ function validateScenario(raw: unknown): Scenario {
     .map((s: any) => ({
       ...s,
       type: s.type ?? 'etc',
+      chapter: typeof s.chapter === 'string' ? s.chapter : '',
       npcs: Array.isArray(s.npcs) ? s.npcs : [],
       skillHints: Array.isArray(s.skillHints) ? s.skillHints : [],
       sanChecks: Array.isArray(s.sanChecks) ? s.sanChecks : [],
@@ -59,6 +60,15 @@ function validateScenario(raw: unknown): Scenario {
   baseScenario.flowEdges = baseScenario.flowEdges ?? [];
   baseScenario.flowLayout = baseScenario.flowLayout ?? [];
   baseScenario.skillTemplates = baseScenario.skillTemplates ?? [];
+  const chaptersFromScenes = new Set<string>();
+  baseScenario.scenes.forEach((s) => {
+    if (s.chapter && typeof s.chapter === 'string' && s.chapter.trim()) {
+      chaptersFromScenes.add(s.chapter.trim());
+    }
+  });
+  baseScenario.chapters = Array.isArray(obj.chapters)
+    ? [...new Set([...obj.chapters.filter((c: any) => typeof c === 'string' && c.trim()), ...chaptersFromScenes])]
+    : [...chaptersFromScenes];
   if (baseScenario.scenes.length === 0) throw new Error('scenes missing');
   return baseScenario;
 }
@@ -86,6 +96,7 @@ function App() {
     addSkillTemplate,
     updateSkillTemplate,
     deleteSkillTemplate,
+    addChapter,
     loadCoc6Templates,
     errorMessage,
     errorAt,
@@ -98,6 +109,7 @@ function App() {
   } = useScenarioStore();
   const [importError, setImportError] = useState<string | null>(null);
   const [toasts, setToasts] = useState<ToastItem[]>([]);
+  const [showHelp, setShowHelp] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const lastSavedToastAt = useRef<number>(0);
   const lastSavedSeen = useRef<number | null>(null);
@@ -221,8 +233,33 @@ function App() {
               onChange={handleImport}
             />
           </label>
+          <button onClick={() => setShowHelp((v) => !v)}>{showHelp ? 'ヘルプを隠す' : 'ヘルプ表示'}</button>
         </div>
       </header>
+
+      {showHelp && (
+        <div className="help-panel">
+          <h3>クイックヘルプ</h3>
+          <ul>
+            <li>シーンは章(チャプター)を入力すると一覧でグループ化されます。</li>
+            <li>フロー: 上部フォームで矢印追加、AND一括で並行→合流を登録。グラフはノードドラッグで移動、背景ドラッグでパン、＋/−でズーム。</li>
+            <li>JSON入出力: ヘッダーのエクスポート/読込を利用。フォーマットは下記概要、詳細は Json_format.md を参照。</li>
+            <li>Undoボタンで直前の変更を戻せます。</li>
+          </ul>
+          <h4>JSONフォーマット概要</h4>
+          <pre className="help-pre">{`
+{
+  meta: { title, system?, author?, estimatedHours?, playerCountHint?, notes? },
+  scenes: [ { id, title, type, chapter?, unlockCondition?, ... } ],
+  npcs:   [ { id, name, role, skills, appearScenes, ... } ],
+  flowEdges: [ { id, from, to, type, condition?, note? } ],
+  flowLayout: [ { sceneId, x, y } ],
+  skillTemplates: [ { id, name, category, defaultValue?, calcStat?, calcMultiplier?, damage? } ]
+}
+`}</pre>
+          <div className="muted small">詳細仕様はリポジトリの Json_format.md を参照してください。</div>
+        </div>
+      )}
 
       {(errorMessage || importError) && (
         <div
@@ -280,6 +317,8 @@ function App() {
             selectedId={selectedSceneId}
             onSelect={selectScene}
             onAdd={addScene}
+            chapters={scenario.chapters ?? []}
+            onAddChapter={addChapter}
             searchText={sceneSearch}
             onSearchTextChange={setSceneSearch}
             typeFilter={sceneTypeFilter}
@@ -298,6 +337,7 @@ function App() {
             <SceneDetail
               scene={selectedScene}
               npcs={scenario.npcs}
+              availableChapters={scenario.chapters ?? []}
               onChange={updateScene}
               onDelete={deleteScene}
             />
@@ -340,6 +380,7 @@ function App() {
               scenes={scenario.scenes}
               edges={scenario.flowEdges}
               layout={scenario.flowLayout}
+              chapters={scenario.chapters ?? []}
               onAddEdge={addFlowEdge}
               onUpdateEdge={updateFlowEdge}
               onDeleteEdge={deleteFlowEdge}

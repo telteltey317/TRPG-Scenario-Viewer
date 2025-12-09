@@ -118,6 +118,7 @@ export interface Scene {
   id: SceneId;
   title: string;
   type: SceneType;
+  chapter?: string;
   unlockCondition?: string;
   locationId?: LocationId;
   locationNameNote?: string;
@@ -166,6 +167,7 @@ export interface Scenario {
   flowEdges: FlowEdge[];
   flowLayout: FlowNodeLayout[];
   skillTemplates: SkillTemplate[];
+  chapters?: string[];
 }
 
 export const emptyScenario: Scenario = {
@@ -179,4 +181,5 @@ export const emptyScenario: Scenario = {
   flowEdges: [],
   flowLayout: [],
   skillTemplates: [],
+  chapters: [],
 };

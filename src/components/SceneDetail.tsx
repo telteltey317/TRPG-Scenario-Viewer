@@ -4,11 +4,12 @@ import './SceneDetail.css';
 type Props = {
   scene: Scene | undefined;
   npcs: Npc[];
+  availableChapters: string[];
   onChange: (scene: Scene) => void;
   onDelete: (id: string) => void;
 };
 
-export function SceneDetail({ scene, npcs, onChange, onDelete }: Props) {
+export function SceneDetail({ scene, npcs, availableChapters, onChange, onDelete }: Props) {
   if (!scene) {
     return <div className="scene-detail">シーンが選択されていません。</div>;
   }
@@ -82,6 +83,18 @@ export function SceneDetail({ scene, npcs, onChange, onDelete }: Props) {
                 <option value="climax">climax</option>
                 <option value="epilogue">epilogue</option>
                 <option value="etc">etc</option>
+              </select>
+            </label>
+            <label>
+              章 / チャプター
+              <select
+                value={scene.chapter ?? ''}
+                onChange={(e) => updateField('chapter', e.target.value)}
+              >
+                <option value="">未分類</option>
+                {availableChapters.map((c) => (
+                  <option key={c} value={c}>{c}</option>
+                ))}
               </select>
             </label>
             <label>

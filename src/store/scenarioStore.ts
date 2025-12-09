@@ -27,6 +27,7 @@ interface ScenarioState {
   updateSkillTemplate: (template: SkillTemplate) => void;
   deleteSkillTemplate: (id: string) => void;
   loadCoc6Templates: (templates: SkillTemplate[]) => void;
+  addChapter: (name: string) => void;
   errorMessage: string | null;
   errorAt: number | null;
   clearError: () => void;
@@ -35,10 +36,19 @@ interface ScenarioState {
   resetToEmpty: () => void;
 }
 
+function ensureChapters(s: Scenario): Scenario {
+  const existing = s.chapters ?? [];
+  const derived = s.scenes
+    .map((sc) => sc.chapter?.trim())
+    .filter((c): c is string => !!c);
+  const chapters = [...new Set([...existing, ...derived])];
+  return { ...s, chapters };
+}
+
 export function useScenarioStore(): ScenarioState {
   const [scenario, setScenarioState] = useState<Scenario>(() => {
     const { scenario: stored } = loadScenarioFromLocalStorage();
-    return stored ?? sampleScenario;
+    return ensureChapters(stored ?? sampleScenario);
   });
   const [history, setHistory] = useState<Scenario[]>([]);
 
@@ -85,7 +95,7 @@ export function useScenarioStore(): ScenarioState {
 
   const api = useMemo<ScenarioState>(() => ({
     scenario,
-    setScenario: setScenarioState,
+    setScenario: (next: Scenario) => setScenarioState(ensureChapters(next)),
     undo: () => {
       setHistory((prev) => {
         const last = prev[prev.length - 1];
@@ -103,6 +113,7 @@ export function useScenarioStore(): ScenarioState {
         id: `scene-${Date.now()}`,
         title: '新規シーン',
         type: 'etc',
+        chapter: '',
         unlockCondition: '',
         locationNameNote: '',
         description: '',
@@ -217,6 +228,16 @@ export function useScenarioStore(): ScenarioState {
         })),
       }));
       setSelectedNpcId((current) => (current === id ? null : current));
+    },
+    addChapter: (name: string) => {
+      const trimmed = name.trim();
+      if (!trimmed) return;
+      pushHistory();
+      setScenarioState((prev) => {
+        const chapters = prev.chapters ?? [];
+        if (chapters.includes(trimmed)) return prev;
+        return { ...prev, chapters: [...chapters, trimmed] };
+      });
     },
     addSkillTemplate: (template: SkillTemplate) => {
       pushHistory();

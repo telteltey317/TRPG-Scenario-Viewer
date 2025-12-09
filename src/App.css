@@ -179,6 +179,27 @@ button:hover,
   font-weight: 700;
 }
 
+.help-panel {
+  margin: 8px 16px 0 16px;
+  padding: 10px 14px;
+  border: 1px solid #dfe3ef;
+  border-radius: 8px;
+  background: #f7f9ff;
+}
+
+.help-panel h3 { margin: 0 0 6px 0; }
+.help-panel h4 { margin: 10px 0 4px 0; font-size: 14px; }
+.help-panel ul { margin: 0 0 8px 16px; padding: 0; }
+.help-panel li { margin-bottom: 4px; }
+.help-pre {
+  background: #111827;
+  color: #e5e7eb;
+  padding: 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  white-space: pre-wrap;
+}
+
 @media (max-width: 1024px) {
   .app__body {
     grid-template-columns: 260px 1fr;

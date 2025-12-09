@@ -6,6 +6,7 @@ type Props = {
   scenes: Scene[];
   edges: FlowEdge[];
   layout: FlowNodeLayout[];
+  chapters?: string[];
   onSelectScene?: (id: string) => void;
   onAutoLayout?: (layout: FlowNodeLayout[]) => void;
   onLayoutChange?: (layout: FlowNodeLayout[]) => void;
@@ -16,13 +17,16 @@ const NODE_H = 60;
 const GAP = 60;
 
 function autoLayoutByDependency(scenes: Scene[], edges: FlowEdge[]): FlowNodeLayout[] {
-  const spacingX = 220;
-  const spacingY = 180;
+  // 左→右へ進む依存ベースレイアウト。レベルをX軸、レベル内順序をY軸。
+  const spacingX = 280;
+  const baseSpacingY = NODE_H + 70; // ラベルを考慮した最低すきま
 
   const indeg = new Map<string, number>();
+  const parents = new Map<string, string[]>();
   const children = new Map<string, string[]>();
   scenes.forEach((s) => {
     indeg.set(s.id, 0);
+    parents.set(s.id, []);
     children.set(s.id, []);
   });
 
@@ -30,53 +34,110 @@ function autoLayoutByDependency(scenes: Scene[], edges: FlowEdge[]): FlowNodeLay
     if (!indeg.has(e.from)) indeg.set(e.from, 0);
     if (!indeg.has(e.to)) indeg.set(e.to, 0);
     indeg.set(e.to, (indeg.get(e.to) ?? 0) + 1);
+    parents.get(e.to)?.push(e.from);
     children.get(e.from)?.push(e.to);
   });
 
+  // レベル計算（幅優先）。サイクルがあっても初期ノードは先頭に。
   const queue: string[] = [];
-  indeg.forEach((d, id) => {
-    if (d === 0) queue.push(id);
-  });
-  // fallback: if all nodes have incoming edges (cycle), start from first scene
+  indeg.forEach((d, id) => { if (d === 0) queue.push(id); });
   if (queue.length === 0 && scenes[0]) queue.push(scenes[0].id);
 
   const level = new Map<string, number>();
   queue.forEach((id) => level.set(id, 0));
-
-  const visited = new Set<string>();
   while (queue.length) {
     const id = queue.shift()!;
-    visited.add(id);
-    const currentLevel = level.get(id) ?? 0;
-    (children.get(id) ?? []).forEach((child) => {
-      if ((level.get(child) ?? -1) < currentLevel + 1) {
-        level.set(child, currentLevel + 1);
-      }
-      indeg.set(child, (indeg.get(child) ?? 1) - 1);
-      if ((indeg.get(child) ?? 0) <= 0 && !visited.has(child)) {
-        queue.push(child);
-      }
+    const lv = level.get(id) ?? 0;
+    (children.get(id) ?? []).forEach((c) => {
+      if ((level.get(c) ?? -1) < lv + 1) level.set(c, lv + 1);
+      indeg.set(c, (indeg.get(c) ?? 1) - 1);
+      if ((indeg.get(c) ?? 0) <= 0) queue.push(c);
     });
   }
+  scenes.forEach((s) => { if (!level.has(s.id)) level.set(s.id, 0); });
 
-  // assign level 0 to any remaining nodes (cycles not reached)
+  const levels: Record<number, Scene[]> = {};
   scenes.forEach((s) => {
-    if (!level.has(s.id)) level.set(s.id, 0);
+    const lv = level.get(s.id) ?? 0;
+    if (!levels[lv]) levels[lv] = [];
+    levels[lv].push(s);
   });
 
-  const grouped = new Map<number, Scene[]>();
-  scenes.forEach((s) => {
-    const l = level.get(s.id) ?? 0;
-    if (!grouped.has(l)) grouped.set(l, []);
-    grouped.get(l)!.push(s);
+  // 並び順改善: 親のy平均でソート（下り）→子のy平均でソート（上り）
+  const order: Record<string, number> = {};
+  Object.entries(levels).forEach(([lvStr, list]) => {
+    list.forEach((scene, idx) => { order[scene.id] = idx * baseSpacingY; });
   });
+
+  // 親ベースの並べ替え
+  Object.keys(levels).map(Number).sort((a, b) => a - b).forEach((lv) => {
+    const list = levels[lv];
+    if (!list) return;
+    list.sort((a, b) => {
+      const ap = parents.get(a.id) ?? [];
+      const bp = parents.get(b.id) ?? [];
+      const ay = ap.length ? ap.reduce((s, p) => s + (order[p] ?? 0), 0) / ap.length : order[a.id] ?? 0;
+      const by = bp.length ? bp.reduce((s, p) => s + (order[p] ?? 0), 0) / bp.length : order[b.id] ?? 0;
+      return ay - by;
+    });
+    list.forEach((scene, idx) => { order[scene.id] = idx * baseSpacingY; });
+  });
+
+  // 子ベースの並べ替え（上り）
+  Object.keys(levels).map(Number).sort((a, b) => b - a).forEach((lv) => {
+    const list = levels[lv];
+    if (!list) return;
+    list.sort((a, b) => {
+      const ac = children.get(a.id) ?? [];
+      const bc = children.get(b.id) ?? [];
+      const ay = ac.length ? ac.reduce((s, c) => s + (order[c] ?? 0), 0) / ac.length : order[a.id] ?? 0;
+      const by = bc.length ? bc.reduce((s, c) => s + (order[c] ?? 0), 0) / bc.length : order[b.id] ?? 0;
+      return ay - by;
+    });
+    list.forEach((scene, idx) => { order[scene.id] = idx * baseSpacingY; });
+  });
+
+  // 衝突解消：各レベル内でy重なりを押し広げる
+  const resolveLevelCollisions = () => {
+    Object.entries(levels).forEach(([lvStr, list]) => {
+      const lv = Number(lvStr);
+      if (!list || list.length === 0) return;
+      // y順にソート
+      list.sort((a, b) => (order[a.id] ?? 0) - (order[b.id] ?? 0));
+      const minGap = baseSpacingY;
+      let cursor = 0;
+      list.forEach((scene, idx) => {
+        if (idx === 0) {
+          cursor = order[scene.id] ?? 0;
+          order[scene.id] = cursor;
+          return;
+        }
+        const target = Math.max(order[scene.id] ?? 0, cursor + minGap);
+        order[scene.id] = target;
+        cursor = target;
+      });
+      // 中央寄せ（平均を0付近に戻す）
+      const avg = list.reduce((s, sc) => s + (order[sc.id] ?? 0), 0) / list.length;
+      list.forEach((sc) => { order[sc.id] = (order[sc.id] ?? 0) - avg; });
+      // 再度間隔確保
+      let cur2 = 0;
+      list.sort((a, b) => (order[a.id] ?? 0) - (order[b.id] ?? 0));
+      list.forEach((sc, idx) => {
+        if (idx === 0) { cur2 = order[sc.id] ?? 0; return; }
+        const target = Math.max(order[sc.id] ?? 0, cur2 + minGap);
+        order[sc.id] = target;
+        cur2 = target;
+      });
+    });
+  };
+
+  resolveLevelCollisions();
 
   const layouts: FlowNodeLayout[] = [];
-  const maxLevel = Math.max(...Array.from(grouped.keys()), 0);
-  for (let l = 0; l <= maxLevel; l++) {
-    const row = grouped.get(l) ?? [];
-    row.forEach((scene, idx) => {
-      layouts.push({ sceneId: scene.id, x: idx * spacingX, y: l * spacingY });
+  const maxLevel = Math.max(...Object.keys(levels).map(Number), 0);
+  for (let lv = 0; lv <= maxLevel; lv++) {
+    (levels[lv] ?? []).forEach((scene) => {
+      layouts.push({ sceneId: scene.id, x: lv * spacingX, y: order[scene.id] ?? 0 });
     });
   }
   return layouts;
@@ -104,8 +165,16 @@ function computeLayout(scenes: Scene[], layout: FlowNodeLayout[]) {
   return map;
 }
 
-export function FlowGraph({ scenes, edges, layout, onSelectScene, onAutoLayout, onLayoutChange }: Props) {
+export function FlowGraph({ scenes, edges, layout, chapters, onSelectScene, onAutoLayout, onLayoutChange }: Props) {
   const layoutMap = useMemo(() => computeLayout(scenes, layout), [scenes, layout]);
+  const chapterColors = useMemo(() => {
+    const palette = ['#4c6fff', '#0ea5e9', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#64748b'];
+    const map = new Map<string, string>();
+    (chapters ?? []).forEach((c, idx) => {
+      map.set(c, palette[idx % palette.length]);
+    });
+    return map;
+  }, [chapters]);
   const [draggingId, setDraggingId] = useState<string | null>(null);
   const dragOffset = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
   const [view, setView] = useState({ x: 10, y: 10, scale: 1 });
@@ -219,6 +288,41 @@ export function FlowGraph({ scenes, edges, layout, onSelectScene, onAutoLayout, 
           const y1 = from.y + NODE_H / 2;
           const x2 = to.x + NODE_W / 2;
           const y2 = to.y + NODE_H / 2;
+          const midX = (x1 + x2) / 2;
+          const midY = (y1 + y2) / 2;
+          const len = Math.hypot(x2 - x1, y2 - y1) || 1;
+          const nx = -(y2 - y1) / len; // 法線ベクトル（左側）
+          const ny = (x2 - x1) / len;
+
+          // ノード矩形との重なりを避けるため、複数オフセット候補から最初に非衝突のものを選ぶ
+          const labelW = 160;
+          const labelH = 44;
+          const offsets = [16, -16, 28, -28, 40, -40, 56, -56];
+          const nodes = scenes.map((s) => layoutMap.get(s.id)).filter(Boolean) as FlowNodeLayout[];
+
+          const hitsNode = (lx: number, ly: number) => {
+            const box = { x: lx - labelW / 2, y: ly - labelH / 2, w: labelW, h: labelH };
+            return nodes.some((n) => {
+              const rx = n.x;
+              const ry = n.y;
+              const rw = NODE_W;
+              const rh = NODE_H;
+              return box.x < rx + rw && box.x + box.w > rx && box.y < ry + rh && box.y + box.h > ry;
+            });
+          };
+
+          let labelX = midX;
+          let labelY = midY;
+          for (const off of offsets) {
+            const lx = midX + nx * off;
+            const ly = midY + ny * off;
+            if (!hitsNode(lx, ly)) {
+              labelX = lx;
+              labelY = ly;
+              break;
+            }
+          }
+
           return (
             <g key={edge.id}>
               <line
@@ -230,11 +334,18 @@ export function FlowGraph({ scenes, edges, layout, onSelectScene, onAutoLayout, 
                 strokeWidth={2}
                 markerEnd="url(#arrow)"
                 opacity={0.9}
+                className="edge-line"
               />
               {(edge.condition || edge.note) && (
-                <text x={(x1 + x2) / 2} y={(y1 + y2) / 2 - 6} className="edge-text">
-                  {edge.condition || edge.note}
-                </text>
+                <foreignObject
+                  x={labelX - 80}
+                  y={labelY - 20}
+                  width="160"
+                  height="44"
+                  className="edge-label"
+                >
+                  <div className="edge-text-block">{edge.condition || edge.note}</div>
+                </foreignObject>
               )}
             </g>
           );
@@ -243,6 +354,7 @@ export function FlowGraph({ scenes, edges, layout, onSelectScene, onAutoLayout, 
         {scenes.map((scene) => {
           const pos = layoutMap.get(scene.id);
           if (!pos) return null;
+          const chapterColor = scene.chapter && chapterColors.get(scene.chapter);
           return (
             <g
               key={scene.id}
@@ -251,9 +363,22 @@ export function FlowGraph({ scenes, edges, layout, onSelectScene, onAutoLayout, 
               onClick={() => onSelectScene?.(scene.id)}
               onMouseDown={(e) => startDrag(scene.id, e)}
             >
-              <rect width={NODE_W} height={NODE_H} rx={10} ry={10} fill="#fff" stroke="#c7d0ff" strokeWidth={1.5} />
-              <text x={NODE_W / 2} y={24} className="node-title">{scene.title}</text>
-              <text x={NODE_W / 2} y={44} className={`node-type node-${scene.type}`}>{scene.type}</text>
+              <rect
+                width={NODE_W}
+                height={NODE_H}
+                rx={10}
+                ry={10}
+                fill="#fff"
+                stroke={chapterColor ?? '#c7d0ff'}
+                strokeWidth={1.6}
+              />
+              {scene.chapter && (
+                <text x={NODE_W / 2} y={16} className="node-chapter" fill={chapterColor ?? '#4b5563'}>
+                  {scene.chapter}
+                </text>
+              )}
+              <text x={NODE_W / 2} y={scene.chapter ? 30 : 24} className="node-title">{scene.title}</text>
+              <text x={NODE_W / 2} y={scene.chapter ? 48 : 44} className={`node-type node-${scene.type}`}>{scene.type}</text>
             </g>
           );
         })}

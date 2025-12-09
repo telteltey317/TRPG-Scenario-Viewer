@@ -119,6 +119,15 @@
 
 .muted { color: #777; }
 
+.scene-group { margin-bottom: 10px; }
+
+.scene-group__header {
+  font-size: 13px;
+  font-weight: 700;
+  color: #4a5568;
+  margin: 6px 0 4px;
+}
+
 @media (max-width: 640px) {
   .scene-list {
     border-right: none;
@@ -140,10 +149,24 @@
     margin-bottom: 6px;
   }
 
-  .scene-list__header button {
-    width: auto;
-    padding: 6px 10px;
-  }
+.scene-list__header button {
+  width: auto;
+  padding: 6px 10px;
+}
+
+.chapter-add {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.chapter-add input {
+  flex: 1;
+  padding: 6px 8px;
+  border: 1px solid #d5d7df;
+  border-radius: 6px;
+  font-size: 14px;
+}
 
   .scene-list__filters {
     gap: 6px;

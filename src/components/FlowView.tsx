@@ -7,6 +7,7 @@ type Props = {
   scenes: Scene[];
   edges: FlowEdge[];
   layout: FlowNodeLayout[];
+  chapters?: string[];
   onAddEdge: (edge: Omit<FlowEdge, 'id'>) => void;
   onUpdateEdge: (edge: FlowEdge) => void;
   onDeleteEdge: (id: string) => void;
@@ -14,7 +15,7 @@ type Props = {
   onSelectScene?: (id: string) => void;
 };
 
-export function FlowView({ scenes, edges, layout, onAddEdge, onUpdateEdge, onDeleteEdge, onAutoLayout, onSelectScene }: Props) {
+export function FlowView({ scenes, edges, layout, chapters, onAddEdge, onUpdateEdge, onDeleteEdge, onAutoLayout, onSelectScene }: Props) {
   const [from, setFrom] = useState<string>('');
   const [to, setTo] = useState<string>('');
   const [type, setType] = useState<FlowEdgeType>('normal');
@@ -143,6 +144,7 @@ export function FlowView({ scenes, edges, layout, onAddEdge, onUpdateEdge, onDel
         scenes={scenes}
         edges={edges}
         layout={layout}
+        chapters={chapters}
         onSelectScene={onSelectScene}
         onLayoutChange={onAutoLayout}
         onAutoLayout={onAutoLayout}
